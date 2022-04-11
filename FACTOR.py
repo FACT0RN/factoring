@@ -535,7 +535,7 @@ class CBlock(ctypes.Structure):
         # Recompute the merkle root
         block.blocktemplate['merkleroot'] = tx_compute_merkle_root([tx['hash'] for tx in block.blocktemplate['transactions']])   
         merkleRoot = uint256()
-        merkleRoot = (ctypes.c_uint64 * 4)(*hashToArray( block.blocktemplate["merkleroot"])) 
+        merkleRoot = (ctypes.c_uint64 * 4)(*hashToArray( block.blocktemplate["merkleroot"] if mine_latest_block else "6a3ae329ed61aee656ddbe14d8b2878125e96d0900ac0bb4c20c4f3300fb68d3")) 
         block.hashMerkleRoot = merkleRoot
 
         #Iterate through a small set of random nonces
@@ -588,15 +588,16 @@ class CBlock(ctypes.Structure):
                             return None
                     check_race += 1
 
+                #Note: the block requires the smaller of the two prime factors to be submitted.
+                #By default, cypari2 lists the factors in ascending order so choose the first factor listed. 
                 f = cfactor(n)
                 factors = [ int(a) for a in f[0]]
                 power   = f[1]
-                print(factors)
 
                 if   (len(factors) == 2):
-                    print( " {:> 5d} {:> 5d} {:> 5d} {:> 5d} {:> 3.3f} Seconds".format( idx, len(factors), factors[0].bit_length(), block.nBits//2, time()-kstart ), flush=True )
-        
                     if ( factors[0].bit_length() == ( block.nBits//2 + (block.nBits&1)) ):
+                        print( " {:> 5d} {:> 5d} {:> 5d} {:> 5d} {:> 3.3f} Seconds".format( idx, len(factors), factors[0].bit_length(), block.nBits//2, time()-kstart ), flush=True )
+                        
                         #Update values for the found block
                         block.nP1     = IntToUint1024(factors[0])
                         block.nNonce  = nonce
@@ -607,15 +608,13 @@ class CBlock(ctypes.Structure):
 
                         #Update block
                         block._hash = block_hash
-                        
+                       
                         print("      N: ", n)
                         print("      W: ", W)
                         print("      P: ", factors[0])
                         print("  Nonce: ", nonce)
                         print("wOffset: ", n - W)
                         print("Total Block Mining Runtime: ", time() - START, " Seconds." )
-                        print()
-                        print()
 
                         return block
 
