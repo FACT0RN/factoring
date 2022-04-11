@@ -633,7 +633,7 @@ gHash.restype = uint1024
 def mine():
     while True:
         B = CBlock()
-        if B.mine( mine_latest_block = False ):
+        if B.mine( mine_latest_block = True ):
             B.rpc_submitblock()
         print(B)
 
