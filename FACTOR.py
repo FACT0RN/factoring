@@ -501,7 +501,7 @@ class CBlock(ctypes.Structure):
 
     #WARNING: the default scriptPubKey here is for a testing wallet.
     #TODO: replace and raise an error if no scriptPubKey is given for master branch.
-    def mine(self, load=True, mine_latest_block = True, coinbase_message = "", scriptPubKey = "00147d2af2ad52307c7c343729b5f09ccac96a35e503"):
+    def mine(self, mine_latest_block = True, coinbase_message = "", scriptPubKey = "00147d2af2ad52307c7c343729b5f09ccac96a35e503"):
         print("Setup Start...", flush=True)
         START = time()
 
@@ -513,7 +513,9 @@ class CBlock(ctypes.Structure):
             block = self.get_next_block_to_work_on()
         else:
             block = self
-            block.nBits = 180
+            block.nBits = 69
+            block.nVersion = 0
+            block.nTime = 1649693313
             block.blocktemplate['coinbasevalue'] = 0
             block.blocktemplate['height'] = 0
             block.blocktemplate['transactions'] = []
@@ -533,12 +535,12 @@ class CBlock(ctypes.Structure):
         # Recompute the merkle root
         block.blocktemplate['merkleroot'] = tx_compute_merkle_root([tx['hash'] for tx in block.blocktemplate['transactions']])   
         merkleRoot = uint256()
-        merkleRoot = (ctypes.c_uint64 * 4)(*hashToArray( block.blocktemplate["merkleroot"]  if mine_latest_block else "6a3ae329ed61aee656ddbe14d8b2878125e96d0900ac0bb4c20c4f3300fb68d3") )
+        merkleRoot = (ctypes.c_uint64 * 4)(*hashToArray( block.blocktemplate["merkleroot"])) 
         block.hashMerkleRoot = merkleRoot
 
         #Iterate through a small set of random nonces
         #Probability of finding a good semiprime is extremely high
-        Seeds = [ random.randint(0,1<<64) for i in range(100)] if mine_latest_block else list(range(100))
+        Seeds = [ random.randint(0,1<<64) for i in range(10000)] if mine_latest_block else list(range(10000))
 
         #Siev filter out multiples of small primes
         siev = 19078266889580195013601891820992757757219839668357012055907516904309700014933909014729740190
@@ -562,7 +564,7 @@ class CBlock(ctypes.Structure):
             print( "Interval to consider has " + str(wMAX-wMIN) + " candidates." ,flush=True)
 
             #Candidates for admissible semiprime
-            candidates = [ a for a in range( wMIN, wMIN) if  ( abs(a-W) > wInterval) and gcd( abs(a-w), siev ) == 1  ] 
+            candidates = [ a for a in range( wMIN, wMAX) if gcd( a, siev ) == 1  ] 
             
             print("Checking candidates are exactly " + str(block.nBits) + " binary digits long.")
             
@@ -577,24 +579,24 @@ class CBlock(ctypes.Structure):
             kstart = time()
             check_race = 0
             for idx, n in enumerate( candidates ):
-                #Check if the current block race has been won already
-                if check_race % 12 == 0:
-                    if rpc_getblockcount() + 1 != block.blocktemplate["height"]:
-                        print("Race was lost. Next block.")
-                        print("Total Block Mining Runtime: ", time() - START, " Seconds." )
-                        return None
-                check_race += 1
+                if mine_latest_block:
+                    #Check if the current block race has been won already
+                    if check_race % 12 == 0:
+                        if rpc_getblockcount() + 1 != block.blocktemplate["height"]:
+                            print("Race was lost. Next block.")
+                            print("Total Block Mining Runtime: ", time() - START, " Seconds." )
+                            return None
+                    check_race += 1
 
                 f = cfactor(n)
                 factors = [ int(a) for a in f[0]]
                 power   = f[1]
+                print(factors)
 
                 if   (len(factors) == 2):
                     print( " {:> 5d} {:> 5d} {:> 5d} {:> 5d} {:> 3.3f} Seconds".format( idx, len(factors), factors[0].bit_length(), block.nBits//2, time()-kstart ), flush=True )
-
-                    if ( factors[0].bit_length() == block.nBits//2 ):
-                        print( factors, nonce )
-
+        
+                    if ( factors[0].bit_length() == ( block.nBits//2 + (block.nBits&1)) ):
                         #Update values for the found block
                         block.nP1     = IntToUint1024(factors[0])
                         block.nNonce  = nonce
@@ -608,6 +610,8 @@ class CBlock(ctypes.Structure):
                         
                         print("      N: ", n)
                         print("      W: ", W)
+                        print("      P: ", factors[0])
+                        print("  Nonce: ", nonce)
                         print("wOffset: ", n - W)
                         print("Total Block Mining Runtime: ", time() - START, " Seconds." )
                         print()
@@ -629,6 +633,9 @@ gHash.restype = uint1024
 def mine():
     while True:
         B = CBlock()
-        if B.mine( load=True, mine_latest_block=True):
+        if B.mine( mine_latest_block = False ):
             B.rpc_submitblock()
         print(B)
+
+if __name__ == "__main__":
+    mine()
