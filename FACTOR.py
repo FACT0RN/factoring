@@ -559,7 +559,7 @@ class CBlock(ctypes.Structure):
             wMAX = int(W + wInterval)
             wMIN = int(W - wInterval) 
             
-            print( "Interval to consider has " + str(wMax-wMin) + " candidates." ,flush=True)
+            print( "Interval to consider has " + str(wMax-wMIN) + " candidates." ,flush=True)
 
             #Candidates for admissible semiprime
             candidates = [ a for a in range( wMIN, wMIN) if  ( abs(a-W) > wInterval) and gcd( abs(a-w), siev ) == 1  ] 
