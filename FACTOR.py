@@ -540,8 +540,8 @@ class CBlock(ctypes.Structure):
         #Probability of finding a good semiprime is extremely high
         Seeds = [ random.randint(0,1<<64) for i in range(100)] if mine_latest_block else list(range(100))
 
-        #Compute sieving wheel for stepping through W's range
-        wheel = [ k for k in range(1, sieve_level1) if gcd(k,2*3*5)==1]
+        #Siev filter out multiples of small primes
+        siev = 19078266889580195013601891820992757757219839668357012055907516904309700014933909014729740190
 
         for nonce in Seeds:
             start = time()
@@ -559,10 +559,10 @@ class CBlock(ctypes.Structure):
             wMAX = int(W + wInterval)
             wMIN = int(W - wInterval) 
             
-            print( "Interval to consider has " + str(fD) + " candidates." ,flush=True)
+            print( "Interval to consider has " + str(wMax-wMin) + " candidates." ,flush=True)
 
             #Candidates for admissible semiprime
-            candidates = [ a for a in range( wMIN, wMin) if  ( abs(a-W) > wInterval) and (abs(a-w)%2 != 0 ) ] 
+            candidates = [ a for a in range( wMIN, wMIN) if  ( abs(a-W) > wInterval) and gcd( abs(a-w), siev ) == 1  ] 
             
             print("Checking candidates are exactly " + str(block.nBits) + " binary digits long.")
             
