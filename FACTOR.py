@@ -577,12 +577,10 @@ class CBlock(ctypes.Structure):
             for idx, n in enumerate( candidates ):
                 if mine_latest_block:
                     #Check if the current block race has been won already
-                    if check_race % 12 == 0:
-                        if rpc_getblockcount() + 1 != block.blocktemplate["height"]:
-                            print("Race was lost. Next block.")
-                            print("Total Block Mining Runtime: ", time() - START, " Seconds." )
-                            return None
-                    check_race += 1
+                    if rpc_getblockcount() + 1 != block.blocktemplate["height"]:
+                        print("Race was lost. Next block.")
+                        print("Total Block Mining Runtime: ", time() - START, " Seconds." )
+                        return None
 
                 #Note: the block requires the smaller of the two prime factors to be submitted.
                 #By default, cypari2 lists the factors in ascending order so choose the first factor listed. 
