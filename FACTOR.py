@@ -233,9 +233,6 @@ def tx_encode_coinbase_height(height):
 
     width = (height.bit_length() + 7 )//8 
 
-    print( bytes([width]).hex()     )
-    print( int2lehex(height, width) )
-    
     return bytes([width]).hex() + int2lehex(height, width)
 
 def make_P2PKH_from_public_key( publicKey = "03564213318d739994e4d9785bf40eac4edbfa21f0546040ce7e6859778dfce5d4" ):
@@ -264,7 +261,6 @@ def tx_make_coinbase(coinbase_script, pubkey_script, value, height):
         string: coinbase transaction as an ASCII hex string
     """
     # See https://en.bitcoin.it/wiki/Transaction
-    print("Coinbase height: ", tx_encode_coinbase_height(height), "   Height: ", height )
     coinbase_script = tx_encode_coinbase_height(height) + coinbase_script
 
     tx = ""
@@ -498,7 +494,6 @@ class CBlock(ctypes.Structure):
     #WARNING: the default scriptPubKey here is for a testing wallet.
     #TODO: replace and raise an error if no scriptPubKey is given for master branch.
     def mine(self, mine_latest_block = True, coinbase_message = "", scriptPubKey = "00147d2af2ad52307c7c343729b5f09ccac96a35e503"):
-        print("Setup Start...", flush=True)
         START = time()
 
         #Get parameters and candidate block
@@ -543,7 +538,6 @@ class CBlock(ctypes.Structure):
 
         for nonce in Seeds:
             start = time()
-            print("Nonce: ", nonce, flush=True)
             #Set the nonce
             block.nNonce = nonce
 
@@ -552,22 +546,14 @@ class CBlock(ctypes.Structure):
             W = uint1024ToInt(W)
 
             #Compute limit range around W
-            print("nBits: ", block.nBits )
             wInterval = 16 * block.nBits 
             wMAX = int(W + wInterval)
             wMIN = int(W - wInterval) 
-            
-            print( "Interval to consider has " + str(wMAX-wMIN) + " candidates." ,flush=True)
-
             #Candidates for admissible semiprime
-            candidates = [ a for a in range( wMIN, wMAX) if gcd( a, siev ) == 1  ] 
-            
-            print("Checking candidates are exactly " + str(block.nBits) + " binary digits long.")
-            
-            #Make sure the candidates have exactly nBits as required by this block
+            candidates = [ a for a in range( wMIN, wMAX) if gcd( a, siev ) == 1 ]
             candidates = [ k for k in candidates if k.bit_length() == block.nBits ] #This line requires python >= 3.10
 
-            print("Survivors: ", len(candidates) )
+            print("[FACTORING] height:", block.blocktemplate['height'], "nonce:", nonce, "bits:", block.nBits, "cds:", len(candidates), "/", wMAX-wMIN )
 
             #Random shuffle candidates
             random.shuffle(candidates)      
@@ -578,8 +564,7 @@ class CBlock(ctypes.Structure):
                 if mine_latest_block:
                     #Check if the current block race has been won already
                     if rpc_getblockcount() + 1 != block.blocktemplate["height"]:
-                        print("Race was lost. Next block.")
-                        print("Total Block Mining Runtime: ", time() - START, " Seconds." )
+                        print("[LOST] Total lost time:", time() - START, " Seconds." )
                         return None
 
                 #Note: the block requires the smaller of the two prime factors to be submitted.
@@ -606,7 +591,6 @@ class CBlock(ctypes.Structure):
                         print("      N: ", n)
                         print("      W: ", W)
                         print("      P: ", factors[0])
-                        print("  Nonce: ", nonce)
                         print("wOffset: ", n - W)
                         print("Total Block Mining Runtime: ", time() - START, " Seconds." )
 
@@ -628,7 +612,6 @@ def mine():
         B = CBlock()
         if B.mine( mine_latest_block = True ):
             B.rpc_submitblock()
-        print(B)
 
 if __name__ == "__main__":
     mine()
