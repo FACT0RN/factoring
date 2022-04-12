@@ -21,7 +21,6 @@ import random
 from time import time
 import multiprocessing
 import hashlib
-import pebble
 import base58
 
 #Attibution note: the Bitcoin RPC components here are taken
@@ -46,9 +45,6 @@ SKIP_MPQS          = 1
 SKIP_ECM_STAGE_ONE = 2
 SKIP_RO_SQUFOF     = 4
 SKIP_ECM_STAGE_TWO = 8
-
-#HTML Parsing Library 
-from bs4 import BeautifulSoup
 
 RPC_URL = os.environ.get("RPC_URL", "http://127.0.0.1:8332")
 RPC_USER = os.environ.get("RPC_USER", "rpcuser")
