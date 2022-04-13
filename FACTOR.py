@@ -31,6 +31,7 @@ import base58
 import cypari2 as cp
 cyp = cp.Pari()
 cyp.default("parisizemax", 1<<29 )
+cyp.default("threadsizemax", 1<<27 )
 cfactor = cyp.factorint
 
 # This gives direct access to the integer factoring engine called by most arithmetical functions. flag is optional; its binary digits mean 
