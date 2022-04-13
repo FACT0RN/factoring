@@ -1,5 +1,9 @@
 #include "gHash.h"
 #include <chrono>
+#include "cpuid.h"
+#include <string>
+
+using namespace std;
 
 int main( int argc, char* argv[]){
 
@@ -28,6 +32,10 @@ int main( int argc, char* argv[]){
    using std::chrono::duration;
    using std::chrono::milliseconds;
 
+   //Clear reorder buffer, barrier the Speculative Execution engines up to here
+   //and retire all mem ops up to here.
+   CPUID cpuID(0); // Get CPU vendor
+
    auto t1 = high_resolution_clock::now();
    uint1024 N = gHash( block, params);
    auto t2 = high_resolution_clock::now();
@@ -35,9 +43,14 @@ int main( int argc, char* argv[]){
    /* Getting number of milliseconds as a double. */
    duration<double, std::milli> ms_double = t2 - t1;
 
-   std::cout << "  N: ";
-   std::cout << std::setfill('0') << std::setw(16) << std::hex;
-   std::cout << N.data[5]  << N.data[4]  << N.data[3] << N.data[2]  << N.data[1]  << N.data[0]; 
+
+   string vendor;
+   vendor += string((const char *)&cpuID.EBX(), 4);
+   vendor += string((const char *)&cpuID.EDX(), 4);
+   vendor += string((const char *)&cpuID.ECX(), 4);
+
+   cout << "CPU vendor = " << vendor << endl;
+   std::cout << N.data[0]; 
    std::cout << std::endl;
    std::cout << "Timing: " << ms_double.count() << "ms\n";
     return 0;
