@@ -494,7 +494,14 @@ class CBlock(ctypes.Structure):
 
     #WARNING: the default scriptPubKey here is for a testing wallet.
     #TODO: replace and raise an error if no scriptPubKey is given for master branch.
-    def mine(self, mine_latest_block = True, coinbase_message = "", scriptPubKey = "00147d2af2ad52307c7c343729b5f09ccac96a35e503"):
+    def mine(self, mine_latest_block = True, coinbase_message = "", scriptPubKey = None ):
+        #Check a value was passed for scriptPubKey
+        if not scriptPubKey:
+            raise ValueError('Please provide a scriptPubKey to allow you to earn rewards for mining. See README.')
+        if len(scriptPubKey) < 30:
+            raise ValueError('Please check your scriptPubKey is correct. It is unlikely to be less than 30 characters long.')
+
+
         START = time()
 
         #Get parameters and candidate block
@@ -609,10 +616,11 @@ gHash = ctypes.CDLL("./gHash.so").gHash
 gHash.restype = uint1024
 
 def mine():
+    scriptPubKey = sys.argv[1].strip() #Remove whitespace around the input if any
     while True:
         B = CBlock()
-        if B.mine( mine_latest_block = True ):
+        if B.mine( mine_latest_block = True, scriptPubKey = scriptPubKey ):
             B.rpc_submitblock()
-
+         
 if __name__ == "__main__":
     mine()
