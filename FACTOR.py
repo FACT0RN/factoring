@@ -47,9 +47,24 @@ SKIP_ECM_STAGE_ONE = 2
 SKIP_RO_SQUFOF     = 4
 SKIP_ECM_STAGE_TWO = 8
 
-RPC_URL = os.environ.get("RPC_URL", "http://127.0.0.1:8332")
-RPC_USER = os.environ.get("RPC_USER", "rpcuser")
-RPC_PASS = os.environ.get("RPC_PASS", "rpcpass") 
+RPC_PORT     = os.environ.get("RPC_PORT", "8332")
+RPC_URL      = os.environ.get("RPC_URL", "http://127.0.0.1:"+ str(RPC_PORT) )
+RPC_USER     = os.environ.get("RPC_USER", "rpcuser")
+RPC_PASS     = os.environ.get("RPC_PASS", "rpcpass") 
+SCRIPTPUBKEY = os.environ.get("SCRIPTPUBKEY") 
+
+#Check that a standard scriptPybKey has been passed. This is a simple check
+#to help avoid mistakes and losing coins. If you know enough to complain
+#about not allowing other types of scriptPubKey then you know enough
+#to modify this and make it suit your needs.
+if SCRIPTPUBKEY == None:
+    print("Your scriptPubKey has not been set. Set the environmental variable SCRIPTPUBKEY with a scriptPubKey from any address in your wallet.")
+    exit(1)
+
+if ( len(SCRIPTPUBKEY) != 44 ):
+    print("Your scriptPubKey ("+str(SCRIPTPUBKEY)+") is not a standard 22 byte scriptPubKey.")
+    print("Please check and verify this is correct. Your mining rewards will be lost if you proceed with scriptPubKey address.")
+    exit(2)
 
 ################################################################################
 # CTypes and utility functions
@@ -501,7 +516,6 @@ class CBlock(ctypes.Structure):
         if len(scriptPubKey) < 30:
             raise ValueError('Please check your scriptPubKey is correct. It is unlikely to be less than 30 characters long.')
 
-
         START = time()
 
         #Get parameters and candidate block
@@ -619,7 +633,7 @@ def mine():
     scriptPubKey = sys.argv[1].strip() #Remove whitespace around the input if any
     while True:
         B = CBlock()
-        if B.mine( mine_latest_block = True, scriptPubKey = scriptPubKey ):
+        if B.mine( mine_latest_block = True, scriptPubKey = SCRIPTPUBKEY ):
             B.rpc_submitblock()
          
 if __name__ == "__main__":
