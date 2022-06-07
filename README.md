@@ -28,6 +28,9 @@ You use export to set them for your session, or you can do the following:
 ```
 RPC_USER=rpcuser RPC_PASS=verylongrpcpasswordpassword SCRIPTPUBKEY=avalidscriptpubkey python FACTOR.py
 ```
+
+To mine FACT0RN a function called gHash is needed. Run the ``build.sh`` script in the top folder of the repo to build the binary that has gHash. 
+
 These instructions are for when you are mining on the same machine that you are running your node. 
 
 Happy factoring!
