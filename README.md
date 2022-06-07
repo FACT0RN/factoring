@@ -34,3 +34,8 @@ To mine FACT0RN a function called gHash is needed. Run the ``build.sh`` script i
 These instructions are for when you are mining on the same machine that you are running your node. 
 
 Happy factoring!
+
+Note: The most efficient factoring software to mine right now is one called YAFU (Yet Another Factoring Utility, https://github.com/bbuhrow/yafu), but just building it requires several other projects be built with the right flags as a pre-requisite. I am currently creating a docker container with it so everyone can use it. The python factoring implementation that is currently used in the script is there because it is easy to use without much programming knowledge, but at this point it is not competetitive. 
+
+
+
