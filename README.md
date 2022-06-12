@@ -6,12 +6,19 @@ an address in your wallet and get the scriptPubKey for that address see the inst
 
 These instructions are for the case where you are mining on the same machine where you have a node running:
 
+1. From the parent folder of this repo, build the image:
 ```
 docker build -t factoring .
-docker run -ti --network host factoring bash
-export SCRIPTPUBKEY="avalidscriptpubkey"
-python3.10 FACTOR.py
 ```
+
+2. Now, to run a container do this:
+
+```
+docker run -d -e SCRIPTPUBKEY="avalidscriptpubkey" --network host factoring python3.10 FACTOR.py 
+```
+
+I'd recommend to run as many container as you have physical cores mines one. So, if you have 4 cores, run 3 containers by executing step 2 three times.
+
 
 Happy factoring!
 
