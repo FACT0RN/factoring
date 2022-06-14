@@ -1,5 +1,7 @@
 import ctypes
 import urllib.request
+import ctypes
+import urllib.request
 import urllib.error
 import urllib.parse
 import base64
@@ -10,11 +12,11 @@ import random
 import os
 import sys
 import struct
-import sympy as sp
+#import sympy as sp
 import gmpy2 as gmp
 from math import floor, ceil
 from gmpy2 import mpz,mpq,mpfr,mpc
-from gmpy2 import isqrt, sqrt, log2, gcd
+from gmpy2 import is_square, isqrt, sqrt, log2, gcd, is_prime, next_prime
 from numpy.ctypeslib import ndpointer
 import subprocess
 import random
@@ -22,30 +24,17 @@ from time import time
 import multiprocessing
 import hashlib
 import base58
-
+from number_theory import *
 #Attibution note: the Bitcoin RPC components here are taken
 #                 from publicly available sources and are not
 #                 my own original code.
 
-#Factoring libraries
-import cypari2 as cp
-cyp = cp.Pari()
-cyp.default("parisizemax", 1<<29 )
-cyp.default("threadsizemax", 1<<27 )
-cfactor = cyp.factorint
+siever = prime_levels_load(4,22) 
+base_sieve = 2*3*5*7*11*13 
 
-# This gives direct access to the integer factoring engine called by most arithmetical functions. flag is optional; its binary digits mean 
-# 1: avoid MPQS, 
-# 2: skip first stage ECM (we may still fall back to it later), 
-# 4: avoid Rho and SQUFOF, 
-# 8: don’t run final ECM (as a result, a huge composite may be declared to be prime). 
-#    Note that a (strong) probabilistic primality test is used, thus composites might not be detected, although no example is known.
-
-#Flags
-SKIP_MPQS          = 1
-SKIP_ECM_STAGE_ONE = 2
-SKIP_RO_SQUFOF     = 4
-SKIP_ECM_STAGE_TWO = 8
+import os
+pid = os.getpid()
+fp = open("factoring_%d.log" % pid,"a")
 
 RPC_PORT     = os.environ.get("RPC_PORT", "8332")
 RPC_URL      = os.environ.get("RPC_URL", "http://127.0.0.1:"+ str(RPC_PORT) )
@@ -362,7 +351,30 @@ class CBlock(ctypes.Structure):
               ("nBits",    ctypes.c_uint16),
              ]
 
-    
+    def build_pow(self, block, W, n, factors, nonce, idx):
+        pdiff = abs(factors[0].bit_length() - factors[1].bit_length())
+        print("Factors bit diff: %d" % pdiff)
+        if ( factors[0].bit_length() == ( block.nBits//2 + (block.nBits&1)) ):
+          print( " {:> 5d} {:> 5d} {:> 5d} {:> 5d} {:> 3.3f} Seconds".format( idx, len(factors), factors[0].bit_length(), block.nBits//2, time()-self.kstart ), flush=True )
+          #Update values for the found block
+          block.nP1     = IntToUint1024(factors[0])
+          block.nNonce  = nonce
+          block.wOffset = n - W
+          #Compute the block hash
+          block_hash = block.compute_raw_hash()
+          #Update block
+          block._hash = block_hash
+          print("      N: ", n)
+          print("      W: ", W)
+          print("      P: ", factors[0])
+          print("wOffset: ", block.wOffset)
+          print("Total Block Mining Runtime: ", time() - self.START, " Seconds." )
+          global fp
+          fp.write("Found block_hash: %s\n" % str(block_hash.hex()))
+          fp.flush()
+          self.Found += 1
+          return block
+          
     def get_next_block_to_work_on(self):
         blocktemplate      = rpc_getblocktemplate()
         self.blocktemplate = blocktemplate 
@@ -503,6 +515,9 @@ class CBlock(ctypes.Structure):
     #WARNING: the default scriptPubKey here is for a testing wallet.
     #TODO: replace and raise an error if no scriptPubKey is given for master branch.
     def mine(self, mine_latest_block = True, coinbase_message = "", scriptPubKey = None ):
+        global fp, primorial_base, siever
+        self.Count = 0
+        self.Found = 0
         #Check a value was passed for scriptPubKey
         if not scriptPubKey:
             raise ValueError('Please provide a scriptPubKey to allow you to earn rewards for mining. See README.')
@@ -548,53 +563,6 @@ class CBlock(ctypes.Structure):
         #Probability of finding a good semiprime is extremely high
         Seeds = [ random.randint(0,1<<64) for i in range(10000)] if mine_latest_block else list(range(10000))
 
-        #Sieving primes by levels, where a level corresponds to all primes with that many bits.
-        #So sieving at level n means removing all numbers with any n-bit prime.
-        #Here's a table of what percentage of all candidates are removed at every level:
-        #
-        #Level      Removed candidates as a percentage
-        #2          0.6666666666666666
-        #3          0.7714285714285714
-        #4          0.8081918081918081
-        #5          0.8471478486110139
-        #6          0.8684126481497298
-        #7          0.8861336590826278
-        #8          0.8996467037376545
-        #9          0.9107441143245115
-        #10         0.9193531905796095
-        #11         0.9265468468966381
-        #12         0.932643270281829
-        #13         0.9377500251662417
-        #14         0.9421954718030565
-        #15         0.9460195709571103
-        #16         0.9493867455534085
-        #17         0.952363027338504
-        #18         0.9550042678652465
-        #19         0.9573729617185134
-        #20         0.9595015390721805
-        #21         0.9614296619957499
-        #22         0.9631823298937472
-        #23         0.9647826123705192
-        #24         0.9662497561067234
-        #25         0.9675998287565128
-        #
-        #The higher the sieve, the more time it takes to sieve any one candidate, 
-        #so at some point it is cheaper to factor each number directly
-        #than it is to use a sieve level. This sweet spot is likely to be 
-        #under 2^26 for CPUs based on heuristics. 
-        #GPUs might be able to handle higher levels, unclear at the moment.
-        siever = [ 0, 1, 6, 5005 ] 
-        
-        prev = sp.primorial( 1<<3, False)
-        for level in range(4,21):
-            current       = sp.primorial( 1 << level, False)
-            level_n_sieve = current//prev
-            prev          = current
-            siever.append(  level_n_sieve )
-
-
-        base_sieve = 2*3*5*7*11*13   #Base Sieve = Levels 2 and 3. Sieves 77.14% of all candidates.
-
         for nonce in Seeds:
             start = time()
             #Set the nonce
@@ -610,8 +578,7 @@ class CBlock(ctypes.Structure):
             wMIN = int(W - wInterval)
 
             #Candidates for admissible semiprime
-            candidates = [ n for n in range( wMIN, wMAX) if gcd( n, base_sieve ) == 1 ] #Chepeast compute high ROI sieving levels first.
-            candidates = [ n for n in candidates if not sp.isprime(n)                 ] #Only now, remove primes.
+            candidates = [ n for n in range( wMIN, wMAX) if not is_prime(n) and gcd( n, base_sieve ) == 1 ] #Chepeast compute high ROI sieving levels first.
 
             #Check edgecase for bitsizes
             candidates = [ n for n in candidates if n.bit_length() == block.nBits ] #This line requires python >= 3.10
@@ -620,7 +587,7 @@ class CBlock(ctypes.Structure):
             for level in range(4,21):
                 candidates = [ n for n in candidates if gcd( siever[level], n ) == 1  ] #Sieve levels 4 to 20 here: finishes removing ~96% candidates total.
 
-            print("[FACTORING] height:", block.blocktemplate['height'], "nonce:", nonce, "bits:", block.nBits, "cds:", len(candidates), "/", wMAX-wMIN )
+            print("[FACTORING] height:", block.blocktemplate['height'], "nonce:", nonce, "bits:", block.nBits, "cds:", len(candidates), "/", wMAX-wMIN, "Count:", self.Count, "Found:", self.Found)
 
             #Random shuffle candidates
             random.shuffle(candidates)      
@@ -636,32 +603,12 @@ class CBlock(ctypes.Structure):
 
                 #Note: the block requires the smaller of the two prime factors to be submitted.
                 #By default, cypari2 lists the factors in ascending order so choose the first factor listed. 
-                f = cfactor(n)
-                factors = [ int(a) for a in f[0]]
-                power   = f[1]
-
-                if   (len(factors) == 2):
-                    if ( factors[0].bit_length() == ( block.nBits//2 + (block.nBits&1)) ):
-                        print( " {:> 5d} {:> 5d} {:> 5d} {:> 5d} {:> 3.3f} Seconds".format( idx, len(factors), factors[0].bit_length(), block.nBits//2, time()-kstart ), flush=True )
-                        
-                        #Update values for the found block
-                        block.nP1     = IntToUint1024(factors[0])
-                        block.nNonce  = nonce
-                        block.wOffset = n - W
-
-                        #Compute the block hash
-                        block_hash = block.compute_raw_hash()
-
-                        #Update block
-                        block._hash = block_hash
-                       
-                        print("      N: ", n)
-                        print("      W: ", W)
-                        print("      P: ", factors[0])
-                        print("wOffset: ", n - W)
-                        print("Total Block Mining Runtime: ", time() - START, " Seconds." )
-
-                        return block
+                factors = factorization_handler(n)
+                self.Count += 1
+                if (len(factors) == 2):
+                   fp.write("Found factors: %s\n" % factors)
+                   fp.flush()
+                   return self.build_pow(block,W,n,factors,nonce, idx)
 
             print("Runtime: ", time() - start )
             

@@ -14,7 +14,7 @@ RUN apt update && apt install -y  \
                   pari-gp         \
                   libpari-dev     
 
-RUN pip install sympy gmpy2 numpy base58 cypari2
+RUN pip install sympy gmpy2 numpy base58 cypari2 factordb-pycli
 
 WORKDIR /tmp/factoring
 
