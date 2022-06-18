@@ -14,13 +14,13 @@ RUN apt update && apt install -y  \
                   pari-gp         \
                   libpari-dev     
 
-RUN pip install sympy gmpy2 numpy base58 cypari2 factordb-python
+
+
+RUN  pip3 install --upgrade pip && pip3 install sympy gmpy2 numpy base58 cypari2 factordb-python
 
 WORKDIR /tmp/factoring
 
-COPY src src 
-COPY FACTOR.py FACTOR.py
-COPY build.sh build.sh
+COPY . . 
 
 RUN ./build.sh
 
