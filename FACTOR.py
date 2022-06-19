@@ -27,7 +27,7 @@ from number_theory import *
 #                 from publicly available sources and are not
 #                 my own original code.
 
-siever = prime_levels_load(4,22) 
+siever = prime_levels_load(4,31) 
 base_primorial = 2*3*5*7*11*13 
 
 pid = os.getpid()
@@ -591,11 +591,15 @@ class CBlock(ctypes.Structure):
             candidates = [ a for a in range( wMIN, wMAX) if gcd( a, base_primorial ) == 1 and not is_prime(a)  ]
 
             #Sieve up to level 20 by default.
-            for level in range(4,21):
+            ss1 = time()
+            for level in range(4,31):
+                s1 = time()
                 candidates = [ n for n in candidates if gcd(siever[level], n ) == 1  ] #Sieve levels 4 to 20 here: finishes removing ~96% candidates total.
+                print("Sieving Level: %d Time: %f" % (level, time() - s1 ))
+            print("Total sieving time: ", time() - ss1 )
+
             candidates = [ k for k in candidates if k.bit_length() == block.nBits ] #This line requires python >= 3.10
 
-            self.Count += 1
             print("[FACTORING] height:", block.blocktemplate['height'], "nonce:", nonce, "bits:", block.nBits, "cds:", len(candidates), "/", wMAX-wMIN, "Count:", self.Count, "Found:", self.Found)
             
             #Random shuffle candidates

@@ -5,6 +5,7 @@ from math import floor, ceil
 from gmpy2 import mpz,mpq,mpfr,mpc
 from gmpy2 import is_square, isqrt, sqrt, log2, gcd, is_prime, next_prime, primorial
 from factordb_connector import *
+from time import time
 import sympy as sp
 import os
 
@@ -148,11 +149,12 @@ def prime_levels_load2(s,e):
   siever = [ 0, 1, 6, 5005 ]
   prev = primorial( 1<<3)
   for level in range(s,e):
+    start = time()
     current       = primorial( 1 << level)
     level_n_sieve = current//prev
     prev          = current
     siever.append(  level_n_sieve )
-    print("Level: %d primes: %d  ok" % (level,(1 << level)))
+    print("Level: %d primes: %d  ok Time: %f" % (level,(1 << level), time()-start ))
   return siever
 
 def prime_levels_load_timing():
