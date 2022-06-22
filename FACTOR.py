@@ -326,9 +326,9 @@ def tx_compute_merkle_root(tx_hashes):
 
         tx_hashes_new = []
 
-        for i in range(len(tx_hashes) // 2):
+        for i in range(0, len(tx_hashes), 2):
             # Concatenate the next two
-            concat = tx_hashes[i] + tx_hashes[i + 1]
+            concat = tx_hashes[i][::-1] + tx_hashes[i + 1][::-1]
             # Hash them
             concat_hash = hashlib.sha256(hashlib.sha256(concat).digest()).digest()
             # Add them to our working list
