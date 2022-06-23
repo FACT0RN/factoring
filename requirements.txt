@@ -1,0 +1,5 @@
+sympy
+cypari2
+gmpy2
+factordb-pycli
+base58
