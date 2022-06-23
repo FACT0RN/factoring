@@ -27,8 +27,6 @@ from number_theory import *
 #                 from publicly available sources and are not
 #                 my own original code.
 
-siever = prime_levels_load(4,31) 
-base_primorial = 2*3*5*7*11*13 
 
 pid = os.getpid()
 fp = open("factoring_%d.log" % pid,"a")
@@ -38,6 +36,12 @@ RPC_URL      = os.environ.get("RPC_URL", "http://127.0.0.1:"+ str(RPC_PORT) )
 RPC_USER     = os.environ.get("RPC_USER", "rpcuser")
 RPC_PASS     = os.environ.get("RPC_PASS", "rpcpass") 
 SCRIPTPUBKEY = os.environ.get("SCRIPTPUBKEY") 
+
+SIEVE_MAX_LEVEL = os.environ.get("SIEVE_MAX_LEVEL")
+if SIEVE_MAX_LEVEL == None: SIEVE_MAX_LEVEL = 31
+siever = prime_levels_load(4, SIEVE_MAX_LEVEL) 
+base_primorial = 2*3*5*7*11*13 
+
 
 #Check that a standard scriptPybKey has been passed. This is a simple check
 #to help avoid mistakes and losing coins. If you know enough to complain
@@ -522,7 +526,7 @@ class CBlock(ctypes.Structure):
     #WARNING: the default scriptPubKey here is for a testing wallet.
     #TODO: replace and raise an error if no scriptPubKey is given for master branch.
     def mine(self, mine_latest_block = True, coinbase_message = "", scriptPubKey = None ):
-        global fp, primorial_base, siever
+        global fp, primorial_base, siever, SIEVE_MAX_LEVEL
         self.Count = 0
         self.Found = 0
         #Check a value was passed for scriptPubKey
@@ -592,7 +596,7 @@ class CBlock(ctypes.Structure):
 
             #Sieve up to level 20 by default.
             ss1 = time()
-            for level in range(4,31):
+            for level in range(4,SIEVE_MAX_LEVEL):
                 s1 = time()
                 candidates = [ n for n in candidates if gcd(siever[level], n ) == 1  ] #Sieve levels 4 to 20 here: finishes removing ~96% candidates total.
                 print("Sieving Level: %d Time: %f" % (level, time() - s1 ))
