@@ -251,7 +251,7 @@ def make_P2PKH_from_public_key( publicKey = "03564213318d739994e4d9785bf40eac4ed
     
     return address
     
-def tx_make_coinbase(coinbase_script, pubkey_script, value, height):
+def tx_make_coinbase(coinbase_script, pubkey_script, value, height, wit_commitment):
     """
     Create a coinbase transaction.
     Arguments:
@@ -281,13 +281,19 @@ def tx_make_coinbase(coinbase_script, pubkey_script, value, height):
     # input[0] seqnum
     tx += "00000000"
     # out-counter
-    tx += "01"
+    tx += "02"
     # output[0] value
     tx += int2lehex(value, 8)
     # output[0] script len
     tx += int2varinthex(len(pubkey_script) // 2)
     # output[0] script
     tx += pubkey_script
+    # witness commitment value
+    tx += int2lehex(0, 8)
+    # witness commitment script len
+    tx += int2varinthex(len(wit_commitment) // 2)
+    # witness commitment script
+    tx += wit_commitment
     # lock-time
     tx += "00000000"
 
@@ -554,7 +560,7 @@ class CBlock(ctypes.Structure):
 
         # Update the coinbase transaction with the new extra nonce
         coinbase_script = coinbase_message 
-        coinbase_tx['data'] = tx_make_coinbase(coinbase_script, scriptPubKey, block.blocktemplate['coinbasevalue'], block.blocktemplate['height'])
+        coinbase_tx['data'] = tx_make_coinbase(coinbase_script, scriptPubKey, block.blocktemplate['coinbasevalue'], block.blocktemplate['height'], block.blocktemplate['default_witness_commitment'])
         coinbase_tx['hash'] = tx_compute_hash(coinbase_tx['data'])
 
         #Add transaction to our block
