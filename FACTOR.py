@@ -655,7 +655,7 @@ def mine():
     if SCRIPTPUBKEY == None:
         SCRIPTPUBKEY = sys.argv[1].strip()
         
-    os.system("logs")
+    os.system("mkdir -p logs")
     pid = os.getpid()
     fplogs = open("logs/factoring_%d.log" % pid,"a")     
    
