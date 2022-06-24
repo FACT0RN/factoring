@@ -39,7 +39,7 @@ SCRIPTPUBKEY = os.environ.get("SCRIPTPUBKEY")
 
 SIEVE_MAX_LEVEL = os.environ.get("SIEVE_MAX_LEVEL")
 if SIEVE_MAX_LEVEL == None: 
-  SIEVE_MAX_LEVEL = 31
+  SIEVE_MAX_LEVEL = 30
 else:
   SIEVE_MAX_LEVEL = int(SIEVE_MAX_LEVEL)
 siever = prime_levels_load(4, SIEVE_MAX_LEVEL) 
