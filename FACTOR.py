@@ -599,7 +599,7 @@ class CBlock(ctypes.Structure):
 
             #Sieve up to level 20 by default.
             ss1 = time()
-            for level in range(4,SIEVE_MAX_LEVEL):
+            for level in range(4,SIEVE_MAX_LEVEL+1):
                 s1 = time()
                 candidates = [ n for n in candidates if gcd(siever[level], n ) == 1  ] #Sieve levels 4 to 20 here: finishes removing ~96% candidates total.
                 print("Sieving Level: %d Time: %f" % (level, time() - s1 ))
