@@ -42,7 +42,7 @@ if SIEVE_MAX_LEVEL == None:
   SIEVE_MAX_LEVEL = 30
 else:
   SIEVE_MAX_LEVEL = int(SIEVE_MAX_LEVEL)
-siever = prime_levels_load(4, SIEVE_MAX_LEVEL) 
+siever = prime_levels_load(4, SIEVE_MAX_LEVEL+1) 
 base_primorial = 2*3*5*7*11*13 
 
 
