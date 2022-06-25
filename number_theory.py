@@ -53,17 +53,19 @@ def pollard(n, limit=1000):
     else:
       return []
 
+os.system("mkdir -p tmp")
+    
 def msieve_factor_driver(n):
   global MSIEVE_BIN
   print("[*] Factoring %d with msieve..." % n) 
   import subprocess, re, os
   tmp = []
-  proc = subprocess.Popen([MSIEVE_BIN,"-s","%d.dat" % n,"-t","8","-v",str(n)],stdout=subprocess.PIPE)
+  proc = subprocess.Popen([MSIEVE_BIN,"-s","tmp/%d.dat" % n,"-t","8","-v",str(n)],stdout=subprocess.PIPE)
   for line in proc.stdout:
     line = line.rstrip().decode("utf8")
     if re.search("factor: ",line):
       tmp += [int(line.split()[2])]
-  os.system("rm %d.dat" % n)
+  os.system("rm tmp/%d.dat" % n)
   return tmp
 
 def yafu_factor_driver(n):
@@ -71,12 +73,12 @@ def yafu_factor_driver(n):
   print("[*] Factoring %d with yafu..." % n)
   import subprocess, re, os
   tmp = []
-  proc = subprocess.Popen([YAFU_BIN,str(n),"-session",str(n),"-qssave","qs_%s.dat" % str(n)],stdout=subprocess.PIPE)
+  proc = subprocess.Popen([YAFU_BIN,str(n),"-session",str(n),"-qssave","tmp/qs_%s.dat" % str(n)],stdout=subprocess.PIPE)
   for line in proc.stdout:
     line = line.rstrip().decode("utf8")
     if re.search("P\d+ = \d+",line):
       tmp += [int(line.split("=")[1])]
-  os.system("rm qs_%d.dat" % n)
+  os.system("rm tmp/qs_%d.dat" % n)
   return tmp
 
 def cfactor(n):
