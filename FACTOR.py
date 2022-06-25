@@ -27,10 +27,6 @@ from number_theory import *
 #                 from publicly available sources and are not
 #                 my own original code.
 
-
-pid = os.getpid()
-fp = open("factoring_%d.log" % pid,"a")
-
 RPC_PORT     = os.environ.get("RPC_PORT", "8332")
 RPC_URL      = os.environ.get("RPC_URL", "http://127.0.0.1:"+ str(RPC_PORT) )
 RPC_USER     = os.environ.get("RPC_USER", "rpcuser")
@@ -369,6 +365,8 @@ class CBlock(ctypes.Structure):
               ("nBits",    ctypes.c_uint16),
              ]
 
+    def __init__(self):
+        self.fplogs = None
    
     def build_pow(self, block, W, n, factors, nonce, idx):
         pdiff = abs(factors[0].bit_length() - factors[1].bit_length())
@@ -388,9 +386,10 @@ class CBlock(ctypes.Structure):
           print("      P: ", factors[0])
           print("wOffset: ", block.wOffset)
           print("Total Block Mining Runtime: ", time() - self.START, " Seconds." )
-          global fp
-          fp.write("Found block_hash: %s\n" % str(block_hash.hex()))
-          fp.flush()
+          
+          if self.fplogs != None:
+              self.fplogs.write("Found block_hash: %s\n" % str(block_hash.hex()))
+              self.fplogs.flush()
           self.Found += 1
           return block
 
@@ -535,7 +534,7 @@ class CBlock(ctypes.Structure):
     #WARNING: the default scriptPubKey here is for a testing wallet.
     #TODO: replace and raise an error if no scriptPubKey is given for master branch.
     def mine(self, mine_latest_block = True, coinbase_message = "", scriptPubKey = None ):
-        global fp, primorial_base, siever, SIEVE_MAX_LEVEL
+        global primorial_base, siever, SIEVE_MAX_LEVEL
         self.Count = 0
         self.Found = 0
         #Check a value was passed for scriptPubKey
@@ -635,8 +634,9 @@ class CBlock(ctypes.Structure):
                  factors = factorization_handler(n)
                  self.Count += 1
                  if (len(factors) == 2):
-                    fp.write("Found factors: %s\n" % factors)
-                    fp.flush()
+                    if self.fplogs != None:
+                        self.fplogs.write("Found factors: %s\n" % factors)
+                        self.fplogs.flush()
                     return self.build_pow(block,W,n,factors,nonce, idx)
 
             print("Runtime: ", time() - start )
@@ -654,12 +654,18 @@ def mine():
     global SCRIPTPUBKEY
     if SCRIPTPUBKEY == None:
         SCRIPTPUBKEY = sys.argv[1].strip()
+        
+    os.system("mkdir -p logs")
+    pid = os.getpid()
+    fplogs = open("logs/factoring_%d.log" % pid,"a")     
+   
     while True:
         B = CBlock()
-
+        B.fplogs = fplogs
         print("[+] SCRIPTPUBKEY: %s" % SCRIPTPUBKEY)
         if B.mine( mine_latest_block = True, scriptPubKey = SCRIPTPUBKEY ):
             B.rpc_submitblock()
-         
+    fplogs.close()
+    
 if __name__ == "__main__":
     mine()
