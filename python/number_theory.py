@@ -11,6 +11,9 @@ import os
 
 MSIEVE_BIN = os.environ.get("MSIEVE_BIN", "NONE") 
 YAFU_BIN   = os.environ.get("YAFU_BIN",   "NONE")
+YAFU_THREADS   = os.environ.get("YAFU_THREADS",   "2")
+YAFU_LATHREADS = os.environ.get("YAFU_LATHREADS", "2")
+
 
 #Factoring libraries
 USE_PARI = True if ( (YAFU_BIN == "NONE") or (YAFU_BIN == "NONE")) else False
@@ -71,7 +74,7 @@ def yafu_factor_driver(n):
   print("[*] Factoring %d with yafu..." % n)
   import subprocess, re, os
   tmp = []
-  proc = subprocess.Popen([YAFU_BIN,str(n),"-one","-session",str(n),"-qssave","qs_%s.dat" % str(n)],stdout=subprocess.PIPE)
+  proc = subprocess.Popen([YAFU_BIN,str(n),"-one","-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS,"-session",str(n),"-qssave","qs_%s.dat" % str(n)],stdout=subprocess.PIPE)
   for line in proc.stdout:
     line = line.rstrip().decode("utf8")
     if re.search("P\d+ = \d+",line):
