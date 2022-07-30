@@ -71,7 +71,7 @@ def yafu_factor_driver(n):
   print("[*] Factoring %d with yafu..." % n)
   import subprocess, re, os
   tmp = []
-  proc = subprocess.Popen([YAFU_BIN,str(n),"-session",str(n),"-qssave","qs_%s.dat" % str(n)],stdout=subprocess.PIPE)
+  proc = subprocess.Popen([YAFU_BIN,str(n),"-one","-session",str(n),"-qssave","qs_%s.dat" % str(n)],stdout=subprocess.PIPE)
   for line in proc.stdout:
     line = line.rstrip().decode("utf8")
     if re.search("P\d+ = \d+",line):
