@@ -145,6 +145,7 @@ RUN apt update && apt install -y  \
 
 WORKDIR /tmp/factoring
 
+#Copy the entire repo into the image
 COPY . . 
 
 RUN ./script/build.sh
@@ -189,6 +190,9 @@ COPY --from=builder /tmp/yafu/libyecm.a                    /tmp/yafu/libyecm.a
 COPY --from=builder /tmp/yafu/libynfs.a                    /tmp/yafu/libynfs.a
 COPY --from=builder /tmp/yafu/libysiqs.a                   /tmp/yafu/libysiqs.a  
 COPY --from=builder /tmp/yafu/yafu                         /tmp/yafu/yafu  
+
+#Copy yafu ini file
+COPY docker/yafu.ini /tmp/yafu
 
 ENV OMP_PROC_BIND="TRUE"
 ENV MSIEVE_BIN="/tmp/ggnfs-bin"
