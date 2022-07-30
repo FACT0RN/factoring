@@ -598,18 +598,23 @@ class CBlock(ctypes.Structure):
             wInterval = 16 * block.nBits 
             wMAX = int(W + wInterval)
             wMIN = int(W - wInterval) 
+            total_cand_count = wMAX - wMIN
 
             #Candidates for admissible semiprime
+            lstart = time()
             candidates = [ a for a in range( wMIN, wMAX) if gcd( a, base_primorial ) == 1 and not is_prime(a)  ]
+            print("Sieving Levels: 1,2,3,4 Time: %f Filtered: %d" % ( time() - lstart, total_cand_count - len(candidates) ) )
 
-            #Sieve up to level 20 by default.
+            #Sieve up to level 26 by default.
             ss1 = time()
-            for level in range(4,SIEVE_MAX_LEVEL+1):
+            for level in range(5,SIEVE_MAX_LEVEL+1):
                 s1 = time()
+                before = len(candidates)
                 candidates = [ n for n in candidates if gcd(siever[level], n ) == 1  ] #Sieve levels 4 to 20 here: finishes removing ~96% candidates total.
-                print("Sieving Level: %d Time: %f" % (level, time() - s1 ))
-            print("Total sieving time: ", time() - ss1 )
-
+                after = len(candidates)
+                print("Sieving Level: %d Time: %f Filtered: %d" % (level, time() - s1, before - after) )
+            print("Total sieving time: %f Sieved: %d of %d  (%f)" % ( time() - ss1, total_cand_count - len(candidates), total_cand_count, 100*(total_cand_count - len(candidates))/total_cand_count )  )
+ 
             candidates = [ k for k in candidates if k.bit_length() == block.nBits ] #This line requires python >= 3.10
 
             print("[FACTORING] height:", block.blocktemplate['height'], "nonce:", nonce, "bits:", block.nBits, "cds:", len(candidates), "/", wMAX-wMIN, "Count:", self.Count, "Found:", self.Found)
