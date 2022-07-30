@@ -613,7 +613,7 @@ class CBlock(ctypes.Structure):
                 candidates = [ n for n in candidates if gcd(siever[level], n ) == 1  ] #Sieve levels 4 to 20 here: finishes removing ~96% candidates total.
                 after = len(candidates)
                 print("Sieving Level: %d Time: %f Filtered: %d" % (level, time() - s1, before - after) )
-            print("Total sieving time: %f Sieved: %d of %d  (%f)" % ( time() - ss1, total_cand_count - len(candidates), total_cand_count, 100*(total_cand_count - len(candidates))/total_cand_count )  )
+            print("Total sieving time: %f Sieved: %d of %d  (%f%%)" % ( time() - ss1, total_cand_count - len(candidates), total_cand_count, 100*(total_cand_count - len(candidates))/total_cand_count )  )
  
             candidates = [ k for k in candidates if k.bit_length() == block.nBits ] #This line requires python >= 3.10
 
@@ -625,7 +625,7 @@ class CBlock(ctypes.Structure):
             self.kstart = time()
             check_race = 0
             for idx, n in enumerate( candidates ):
-                 print("-" * 80)
+                 print("-" * 50, idx, "of", len(candidates), 50*"-")
 
                  if mine_latest_block:
 
