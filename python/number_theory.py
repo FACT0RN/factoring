@@ -79,6 +79,8 @@ def yafu_factor_driver(n):
     line = line.rstrip().decode("utf8")
     if re.search("P\d+ = \d+",line):
       tmp += [int(line.split("=")[1])]
+    if re.search("C\d+ = \d+",line):
+      tmp += [int(line.split("=")[1])]
   os.system("rm qs_%d.dat" % n)
   return tmp
 
@@ -96,8 +98,9 @@ def external_factorization(n):
   else:
       factors = yafu_factor_driver(n)
 
-  if len(factors) == 0:
-    factors = msieve_factor_driver(n)
+  #YAFU already uses msieve
+  #if len(factors) == 0:
+  #  factors = msieve_factor_driver(n)
   return factors
 
 def factorization_handler(n):
