@@ -8,13 +8,13 @@ These instructions are for the case where you are mining on the same machine whe
 
 1. From the parent folder of this repo, build the image:
 ```
-docker build -t factoring .
+docker build -t factorn_mining .
 ```
 
 2. Now, to run a container do this:
 
 ```
-docker run -d -e SCRIPTPUBKEY="ValidScriptPubKey" -e RPC_USER="Your node's rpc username" -e RPC_PASS="Your node rpc's password" --network host test_factoring  bash -c "python3.10 FACTOR.py"
+docker run -d -e SCRIPTPUBKEY="ValidScriptPubKey" -e RPC_USER="Your node's rpc username" -e RPC_PASS="Your node rpc's password" --network host factorn_mining  bash -c "python3.10 FACTOR.py"
 ```
 
 I'd recommend to run as many container as you have physical cores mines one. So, if you have 4 cores, run 3 containers by executing step 2 three times.
