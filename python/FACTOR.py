@@ -639,10 +639,15 @@ class CBlock(ctypes.Structure):
                  factors = factorization_handler(n)
                  self.Count += 1
                  if (len(factors) == 2):
-                    if self.fplogs != None:
-                        self.fplogs.write("Found factors: %s\n" % factors)
-                        self.fplogs.flush()
-                    return self.build_pow(block,W,n,factors,nonce, idx)
+                    if ( factors[0].bit_length() ==  ( block.nBits//2 + (block.nBits&1))  ):
+                        pPrime = is_prime(factors[0])
+                        qPrime = is_prime(factors[1])
+                        if (  (pPrime and qPrime) == True  ):
+                            if self.fplogs != None:
+                                self.fplogs.write("Found factors: %s\n" % factors)
+                                self.fplogs.flush()
+                            return self.build_pow(block,W,n,factors,nonce, idx)
+
 
             print("Runtime: ", time() - start )
             
