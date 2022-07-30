@@ -14,7 +14,7 @@ docker build -t factoring .
 2. Now, to run a container do this:
 
 ```
-docker run -d -e SCRIPTPUBKEY="avalidscriptpubkey" --network host factoring python3.10 FACTOR.py 
+docker run -d -e SCRIPTPUBKEY="ValidScriptPubKey" -e RPC_USER="Your node's rpc username" -e RPC_PASS="Your node rpc's password" --network host test_factoring  bash -c "python3.10 FACTOR.py"
 ```
 
 I'd recommend to run as many container as you have physical cores mines one. So, if you have 4 cores, run 3 containers by executing step 2 three times.
@@ -22,4 +22,4 @@ I'd recommend to run as many container as you have physical cores mines one. So,
 
 Happy factoring!
 
-Note: there are a few sophiscated software implemntations for factoring. For advanced users, you can look into YAFU, ECM-GMP and CADO-NFS. I can not entertain requests to set them up for mining as they take a long time to set up and configure to mine efficiently. Creating a Dockerfile for it has proved difficult, if you are able to find one please submit it. I would be willing to do this for a fee as a percentage of mined coins, but even then, it would have to wait until I have time for it.
+Note: There are a few sophiscated software implemntations for factoring. Currently, we use YAFU by default. For advanced users, you can look into YAFU, ECM-GMP and CADO-NFS. A setup using CADO-NFS is welcomed. If you create one, please let us know.
