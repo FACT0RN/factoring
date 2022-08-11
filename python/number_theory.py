@@ -11,9 +11,10 @@ import os
 
 MSIEVE_BIN = os.environ.get("MSIEVE_BIN", "NONE") 
 YAFU_BIN   = os.environ.get("YAFU_BIN",   "NONE")
+CADO_BIN   = os.environ.get("CADO_BIN",   "NONE")
 YAFU_THREADS   = os.environ.get("YAFU_THREADS",   "2")
 YAFU_LATHREADS = os.environ.get("YAFU_LATHREADS", "2")
-
+TIMEOUT=600
 
 #Factoring libraries
 USE_PARI = True if ( (YAFU_BIN == "NONE") or (YAFU_BIN == "NONE")) else False
@@ -55,6 +56,19 @@ def pollard(n, limit=1000):
       return n//d, d
     else:
       return []
+    
+    
+def cadonfs_factor_driver(n):
+  global CADO_BIN, TIMEOUT
+  print("[*] Factoring %d with yafu..." % n)
+  tmp = []
+  proc = subprocess.Popen(["timeout", str(TIMEOUT), CADO_BIN, str(n)], stdout=subprocess.PIPE)
+  for line in proc.stdout:
+    line = line.rstrip().decode("utf8")
+    if re.search("\d+",line):
+      tmp += [int(x) for x in line.split(" ")]
+  return tmp
+
 
 def msieve_factor_driver(n):
   global MSIEVE_BIN
