@@ -12,8 +12,8 @@ import os
 MSIEVE_BIN = os.environ.get("MSIEVE_BIN", "NONE") 
 YAFU_BIN   = os.environ.get("YAFU_BIN",   "NONE")
 CADO_BIN   = os.environ.get("CADO_BIN",   "NONE")
-YAFU_THREADS   = os.environ.get("YAFU_THREADS",   "2")
-YAFU_LATHREADS = os.environ.get("YAFU_LATHREADS", "2")
+YAFU_THREADS   = os.environ.get("YAFU_THREADS",   "4")
+YAFU_LATHREADS = os.environ.get("YAFU_LATHREADS", "4")
 TIMEOUT=600
 
 #Factoring libraries
