@@ -88,14 +88,13 @@ def yafu_factor_driver(n):
   print("[*] Factoring %d with yafu..." % n)
   import subprocess, re, os
   tmp = []
-  proc = subprocess.Popen([YAFU_BIN,str(n),"-one","-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS,"-session",str(n),"-qssave","/tmp/qs_%s.dat" % str(n)],stdout=subprocess.PIPE)
+  proc = subprocess.Popen([YAFU_BIN,"-one","-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, str(n)],stdout=subprocess.PIPE)
   for line in proc.stdout:
     line = line.rstrip().decode("utf8")
     if re.search("P\d+ = \d+",line):
       tmp += [int(line.split("=")[1])]
     if re.search("C\d+ = \d+",line):
       tmp += [int(line.split("=")[1])]
-  os.system("rm qs_%d.dat" % n)
   return tmp
 
 def cfactor(n):
