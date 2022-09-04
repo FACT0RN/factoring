@@ -118,7 +118,12 @@ def external_factorization(n):
 
 def factorization_handler(n):
   print("[*] Factoring:",n)
-  F = getfdb(n)
+
+
+  #Turn this off for now. There seems to be an issue connecting to the database site.
+  #F = getfdb(n)
+  F = []
+
   if len(F) == 0:
     factors = external_factorization(n)
     print("[+] factors: %s" % str(factors))
@@ -131,7 +136,8 @@ def factorization_handler(n):
       else:
         factors += external_factorization(f)
   factors = sorted(factors)
-  send2fdb(n,factors)
+  #There seems to be an issue with the website for FactorDB. Turn off for now.
+  #send2fdb(n,factors)
   return factors
 
 def ranged_primorial(L, p = 2):
