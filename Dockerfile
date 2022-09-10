@@ -109,6 +109,7 @@ RUN  wget https://gmplib.org/download/gmp/gmp-6.2.1.tar.lz                      
      cd /tmp                                                                                               && \ 
      git clone https://github.com/bbuhrow/yafu.git                                                         && \ 
      cd /tmp/yafu                                                                                          && \ 
+     git checkout 13cfca2b533dd8353cb6e1ef4b6002ea01fef8da                                                 && \
      make yafu NFS=1                                                                                       
 
 #Copy yafu ini file
