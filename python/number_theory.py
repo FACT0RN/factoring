@@ -71,7 +71,7 @@ def cadonfs_factor_driver(n):
 
 
 def msieve_factor_driver(n):
-  global MSIEVE_BIN
+  global MSIEVE_BIN, TIMEOUT 
   print("[*] Factoring %d with msieve..." % n) 
   import subprocess, re, os
   tmp = []
