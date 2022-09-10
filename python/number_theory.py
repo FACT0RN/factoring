@@ -75,7 +75,7 @@ def msieve_factor_driver(n):
   print("[*] Factoring %d with msieve..." % n) 
   import subprocess, re, os
   tmp = []
-  proc = subprocess.Popen([MSIEVE_BIN,"-s","/tmp/%d.dat" % n,"-t","8","-v",str(n)],stdout=subprocess.PIPE)
+  proc = subprocess.Popen(["timeout",str(TIMEOUT),MSIEVE_BIN,"-s","/tmp/%d.dat" % n,"-t","8","-v",str(n)],stdout=subprocess.PIPE)
   for line in proc.stdout:
     line = line.rstrip().decode("utf8")
     if re.search("factor: ",line):
@@ -84,11 +84,11 @@ def msieve_factor_driver(n):
   return tmp
 
 def yafu_factor_driver(n):
-  global YAFU_BIN
+  global YAFU_BIN, TIMEOUT 
   print("[*] Factoring %d with yafu..." % n)
   import subprocess, re, os
   tmp = []
-  proc = subprocess.Popen([YAFU_BIN,"-one","-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, str(n)],stdout=subprocess.PIPE)
+  proc = subprocess.Popen(["timeout",str(TIMEOUT),YAFU_BIN,"-one","-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, str(n)],stdout=subprocess.PIPE)
   for line in proc.stdout:
     line = line.rstrip().decode("utf8")
     if re.search("P\d+ = \d+",line):
@@ -111,9 +111,10 @@ def external_factorization(n):
   else:
       factors = yafu_factor_driver(n)
 
-  #YAFU already uses msieve
-  #if len(factors) == 0:
-  #  factors = msieve_factor_driver(n)
+  # YAFU already uses msieve
+  # needed when yafu fails on some cases
+  if len(factors) == 0:
+    factors = msieve_factor_driver(n)
   return factors
 
 def factorization_handler(n):
