@@ -62,8 +62,9 @@ def cadonfs_factor_driver(n):
   global CADO_BIN, TIMEOUT
   print("[*] Factoring %d with yafu..." % n)
   tmp = []
-  proc = subprocess.Popen(["timeout", str(TIMEOUT), CADO_BIN, str(n)], stdout=subprocess.PIPE)
-  for line in proc.stdout:
+  proc = subprocess.run([ CADO_BIN, str(n)], stdout=subprocess.PIPE, timeout=TIMEOUT)
+  stdout1 = proc.stdout.decode("utf8").split("\n")
+  for line in stdout1:
     line = line.rstrip().decode("utf8")
     if re.search("\d+",line):
       tmp += [int(x) for x in line.split(" ")]
@@ -75,8 +76,9 @@ def msieve_factor_driver(n):
   print("[*] Factoring %d with msieve..." % n) 
   import subprocess, re, os
   tmp = []
-  proc = subprocess.Popen(["timeout",str(TIMEOUT),MSIEVE_BIN,"-s","/tmp/%d.dat" % n,"-t","8","-v",str(n)],stdout=subprocess.PIPE)
-  for line in proc.stdout:
+  proc = subprocess.run([MSIEVE_BIN,"-s","/tmp/%d.dat" % n,"-t","8","-v",str(n)],stdout=subprocess.PIPE, timeout=TIMEOUT)
+  stdout1 = proc.stdout.decode("utf8").split("\n")
+  for line in stdout1:
     line = line.rstrip().decode("utf8")
     if re.search("factor: ",line):
       tmp += [int(line.split()[2])]
@@ -88,9 +90,10 @@ def yafu_factor_driver(n):
   print("[*] Factoring %d with yafu..." % n)
   import subprocess, re, os
   tmp = []
-  proc = subprocess.Popen(["timeout",str(TIMEOUT),YAFU_BIN,"-one","-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, str(n)],stdout=subprocess.PIPE)
-  for line in proc.stdout:
-    line = line.rstrip().decode("utf8")
+  proc = subprocess.run([YAFU_BIN,"-one","-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, str(n)],stdout=subprocess.PIPE, timeout=TIMEOUT)
+  stdout1 = proc.stdout.decode("utf8").split("\n")
+  for line in stdout1:
+    line = line.rstrip()
     if re.search("P\d+ = \d+",line):
       tmp += [int(line.split("=")[1])]
     if re.search("C\d+ = \d+",line):
