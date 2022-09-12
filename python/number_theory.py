@@ -14,7 +14,10 @@ YAFU_BIN   = os.environ.get("YAFU_BIN",   "NONE")
 CADO_BIN   = os.environ.get("CADO_BIN",   "NONE")
 YAFU_THREADS   = os.environ.get("YAFU_THREADS",   "4")
 YAFU_LATHREADS = os.environ.get("YAFU_LATHREADS", "4")
-TIMEOUT=600
+TIMEOUT=120  #Testing shows it takes about 95 seconds at 4 threads with HT/SMT to factor 280-bit integers.
+             #this value should be updated periodically. If you are using 8 or 12 threads, this number
+             #be lowered by 20% and 30% respectively. Testing needs to be done to collect data and have
+             #empirically good numbers for the timeout.
 
 #Factoring libraries
 USE_PARI = True if ( (YAFU_BIN == "NONE") or (YAFU_BIN == "NONE")) else False
@@ -90,8 +93,15 @@ def yafu_factor_driver(n):
   print("[*] Factoring %d with yafu..." % n)
   import subprocess, re, os
   tmp = []
-  proc = subprocess.run([YAFU_BIN,"-one","-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, str(n)],stdout=subprocess.PIPE, timeout=TIMEOUT)
-  stdout1 = proc.stdout.decode("utf8").split("\n")
+  proc = None
+  stdout1 = None
+
+  try:
+    proc    = subprocess.run([YAFU_BIN,"-one","-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, str(n)],stdout=subprocess.PIPE, timeout=TIMEOUT)
+    stdout1 = proc.stdout.decode("utf8").split("\n")
+  except subprocess.TimeoutExpired:
+     return [-1,0,1]
+
   for line in stdout1:
     line = line.rstrip()
     if re.search("P\d+ = \d+",line):
