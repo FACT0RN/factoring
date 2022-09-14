@@ -14,7 +14,7 @@ YAFU_BIN   = os.environ.get("YAFU_BIN",   "NONE")
 CADO_BIN   = os.environ.get("CADO_BIN",   "NONE")
 YAFU_THREADS   = os.environ.get("YAFU_THREADS",   "4")
 YAFU_LATHREADS = os.environ.get("YAFU_LATHREADS", "4")
-TIMEOUT=120  #Testing shows it takes about 95 seconds at 4 threads with HT/SMT to factor 280-bit integers.
+TIMEOUT=300  #Testing shows it takes about 95 seconds at 4 threads with HT/SMT to factor 280-bit integers.
              #this value should be updated periodically. If you are using 8 or 12 threads, this number
              #be lowered by 20% and 30% respectively. Testing needs to be done to collect data and have
              #empirically good numbers for the timeout.
