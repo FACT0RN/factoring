@@ -14,10 +14,6 @@ YAFU_BIN   = os.environ.get("YAFU_BIN",   "NONE")
 CADO_BIN   = os.environ.get("CADO_BIN",   "NONE")
 YAFU_THREADS   = os.environ.get("YAFU_THREADS",   "4")
 YAFU_LATHREADS = os.environ.get("YAFU_LATHREADS", "4")
-TIMEOUT=300  #Testing shows it takes about 95 seconds at 4 threads with HT/SMT to factor 280-bit integers.
-             #this value should be updated periodically. If you are using 8 or 12 threads, this number
-             #be lowered by 20% and 30% respectively. Testing needs to be done to collect data and have
-             #empirically good numbers for the timeout.
 
 #Factoring libraries
 USE_PARI = True if ( (YAFU_BIN == "NONE") or (YAFU_BIN == "NONE")) else False
@@ -62,12 +58,11 @@ def pollard(n, limit=1000):
     
     
 def cadonfs_factor_driver(n):
-  global CADO_BIN, TIMEOUT
+  global CADO_BIN
   print("[*] Factoring %d with yafu..." % n)
   tmp = []
-  proc = subprocess.run([ CADO_BIN, str(n)], stdout=subprocess.PIPE, timeout=TIMEOUT)
-  stdout1 = proc.stdout.decode("utf8").split("\n")
-  for line in stdout1:
+  proc = subprocess.Popen([ CADO_BIN, str(n)], stdout=subprocess.PIPE)
+  for line in proc.stdout:
     line = line.rstrip().decode("utf8")
     if re.search("\d+",line):
       tmp += [int(x) for x in line.split(" ")]
@@ -75,13 +70,12 @@ def cadonfs_factor_driver(n):
 
 
 def msieve_factor_driver(n):
-  global MSIEVE_BIN, TIMEOUT 
+  global MSIEVE_BIN
   print("[*] Factoring %d with msieve..." % n) 
   import subprocess, re, os
   tmp = []
-  proc = subprocess.run([MSIEVE_BIN,"-s","/tmp/%d.dat" % n,"-t","8","-v",str(n)],stdout=subprocess.PIPE, timeout=TIMEOUT)
-  stdout1 = proc.stdout.decode("utf8").split("\n")
-  for line in stdout1:
+  proc = subprocess.Popen([MSIEVE_BIN,"-s","/tmp/%d.dat" % n,"-t","8","-v",str(n)],stdout=subprocess.PIPE)
+  for line in proc.stdout:
     line = line.rstrip().decode("utf8")
     if re.search("factor: ",line):
       tmp += [int(line.split()[2])]
@@ -89,21 +83,13 @@ def msieve_factor_driver(n):
   return tmp
 
 def yafu_factor_driver(n):
-  global YAFU_BIN, TIMEOUT 
+  global YAFU_BIN
   print("[*] Factoring %d with yafu..." % n)
   import subprocess, re, os
   tmp = []
-  proc = None
-  stdout1 = None
-
-  try:
-    proc    = subprocess.run([YAFU_BIN,"-one","-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, str(n)],stdout=subprocess.PIPE, timeout=TIMEOUT)
-    stdout1 = proc.stdout.decode("utf8").split("\n")
-  except subprocess.TimeoutExpired:
-     return [-1,0,1]
-
-  for line in stdout1:
-    line = line.rstrip()
+  proc = subprocess.Popen([YAFU_BIN,"-one","-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, str(n)],stdout=subprocess.PIPE)
+  for line in proc.stdout:
+    line = line.rstrip().decode("utf8")
     if re.search("P\d+ = \d+",line):
       tmp += [int(line.split("=")[1])]
     if re.search("C\d+ = \d+",line):
@@ -124,10 +110,9 @@ def external_factorization(n):
   else:
       factors = yafu_factor_driver(n)
 
-  # YAFU already uses msieve
-  # needed when yafu fails on some cases
-  if len(factors) == 0:
-    factors = msieve_factor_driver(n)
+  #YAFU already uses msieve
+  #if len(factors) == 0:
+  #  factors = msieve_factor_driver(n)
   return factors
 
 def factorization_handler(n):
