@@ -23,3 +23,13 @@ I'd recommend to run as many container as you have physical cores mines one. So,
 Happy factoring!
 
 Note: There are a few sophiscated software implemntations for factoring. Currently, we use YAFU by default. For advanced users, you can look into YAFU, ECM-GMP and CADO-NFS. A setup using CADO-NFS is welcomed. If you create one, please let us know.
+
+# Contact
+
+Website: https://fact0rn.io <br>
+Whitepaper: https://fact0rn.io/FACT0RN_whitepaper.pdf <br>
+Coinbase: https://blog.coinbase.com/fact0rn-blockchain-integer-factorization-as-proof-of-work-pow-bc48c6f2100b <br>
+E-mail: fact0rn@pm.me <br>
+Discord: https://discord.gg/gG7MXxS5Fd <br>
+Twitter: https://twitter.com/LionesEscanor <br>
+Reddit: https://www.reddit.com/r/FACT0RN/
