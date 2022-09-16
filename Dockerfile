@@ -44,7 +44,7 @@ ARG BUILDTHREADS=4
 COPY ./docker/msieve-code-r1044-trunk    /tmp/msieve
 
 #Install it all in the right order
-RUN  wget https://gmplib.org/download/gmp/gmp-6.2.1.tar.lz                                                 && \ 
+RUN  wget https://github.com/FACT0RN/GMP/releases/download/release_6.2.1/gmp-6.2.1.tar.lz                  && \ 
      tar --lzip  -xf gmp-6.2.1.tar.lz                                                                      && \    
      cd /tmp/gmp-6.2.1                                                                                     && \   
      autoreconf -i                                                                                         && \
