@@ -109,8 +109,8 @@ RUN  wget https://github.com/FACT0RN/GMP/releases/download/release_6.2.1/gmp-6.2
      cd /tmp                                                                                               && \ 
      git clone https://github.com/bbuhrow/yafu.git                                                         && \ 
      cd /tmp/yafu                                                                                          && \ 
-     git checkout 13cfca2b533dd8353cb6e1ef4b6002ea01fef8da                                                 && \
-     make yafu NFS=1                                                                                       
+     git checkout ecfeb34c87222e7becf4829e22f4899f7dd5bfc7                                                 && \
+     make yafu NFS=1
 
 #Copy yafu ini file
 COPY docker/yafu.ini /tmp/yafu
