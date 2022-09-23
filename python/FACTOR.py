@@ -14,7 +14,7 @@ import struct
 import gmpy2 as gmp
 from math import floor, ceil
 from gmpy2 import mpz,mpq,mpfr,mpc
-from gmpy2 import is_square, isqrt, sqrt, log2, gcd, is_prime, next_prime
+from gmpy2 import is_square, is_power, isqrt, sqrt, log2, gcd, is_prime, next_prime
 from numpy.ctypeslib import ndpointer
 import subprocess
 import random
@@ -615,7 +615,7 @@ class CBlock(ctypes.Structure):
                 print("Sieving Level: %d Time: %f Filtered: %d" % (level, time() - s1, before - after) )
             print("Total sieving time: %f Sieved: %d of %d  (%f%%)" % ( time() - ss1, total_cand_count - len(candidates), total_cand_count, 100*(total_cand_count - len(candidates))/total_cand_count )  )
  
-            candidates = [ k for k in candidates if k.bit_length() == block.nBits ] #This line requires python >= 3.10
+            candidates = [ k for k in candidates if k.bit_length() == block.nBits and not is_power(k) ] #This line requires python >= 3.10
 
             print("[FACTORING] height:", block.blocktemplate['height'], "nonce:", nonce, "bits:", block.nBits, "cds:", len(candidates), "/", wMAX-wMIN, "Count:", self.Count, "Found:", self.Found)
             
