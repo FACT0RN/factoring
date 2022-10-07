@@ -535,7 +535,7 @@ class CBlock(ctypes.Structure):
     #TODO: replace and raise an error if no scriptPubKey is given for master branch.
     def mine(self, mine_latest_block = True, coinbase_message = "", scriptPubKey = None ):
         global primorial_base, siever, SIEVE_MAX_LEVEL
-        self.Count = 0
+        
         self.Found = 0
         #Check a value was passed for scriptPubKey
         if not scriptPubKey:
@@ -624,6 +624,8 @@ class CBlock(ctypes.Structure):
 
             self.kstart = time()
             check_race = 0
+            self.Count = 0
+            
             for idx, n in enumerate( candidates ):
                  print("-" * 50, idx, "of", len(candidates), 50*"-")
 
@@ -632,6 +634,7 @@ class CBlock(ctypes.Structure):
                     #Check if the current block race has been won already
                     if rpc_getblockcount() + 1 != block.blocktemplate["height"]:
                         print("[LOST] Total lost time:", time() - self.START, " Seconds." )
+                        print("Factored: %d of %d" % (self.Count, len(candidates))
                         return None
 
                  #Note: the block requires the smaller of the two prime factors to be submitted.
