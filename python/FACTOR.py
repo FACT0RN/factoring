@@ -633,8 +633,8 @@ class CBlock(ctypes.Structure):
 
                     #Check if the current block race has been won already
                     if rpc_getblockcount() + 1 != block.blocktemplate["height"]:
+                        print("Factored: %d of %d" % (self.Count, len(candidates)))
                         print("[LOST] Total lost time:", time() - self.START, " Seconds." )
-                        print("Factored: %d of %d" % (self.Count, len(candidates))
                         return None
 
                  #Note: the block requires the smaller of the two prime factors to be submitted.
