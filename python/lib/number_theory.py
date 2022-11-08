@@ -4,7 +4,7 @@
 from math import floor, ceil
 from gmpy2 import mpz,mpq,mpfr,mpc
 from gmpy2 import is_square, isqrt, sqrt, log2, gcd, is_prime, next_prime, primorial
-from factordb_connector import *
+from .factordb_connector import *
 from time import time
 import sympy as sp
 import os
