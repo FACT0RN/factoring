@@ -14,10 +14,10 @@ docker build -t factorn_mining .
 2. Now, to run a container do this:
 
 ```
-docker run -ti -e SCRIPTPUBKEY="ValidScriptPubKey" -e RPC_USER="Your node's rpc username" -e RPC_PASS="Your node rpc's password" -e YAFU_THREADS=4 -e YAFU_LATHREADS=4 --network host factorn_mining  bash -c "python3.10 FACTOR.py"
+docker run -ti -e SCRIPTPUBKEY="ValidScriptPubKey" -e RPC_USER="Your node's rpc username" -e RPC_PASS="Your node rpc's password" -e YAFU_THREADS=max_core_count_minus_one -e YAFU_LATHREADS=max_core_count_minus_one --network host factorn_mining  bash -c "python3.10 FACTOR.py"
 ```
 
-I'd recommend to run as many container as you have physical cores mines one. So, if you have 4 cores, run 3 containers by executing step 2 three times.
+I'd recommend to run one container. Use as many threads as you have cores, minus one so the OS has on core to do normal system stuff. If you run htop you will see how many cores you have.
 
 
 Happy factoring!
@@ -30,6 +30,6 @@ Website: https://fact0rn.io <br>
 Whitepaper: https://fact0rn.io/FACT0RN_whitepaper.pdf <br>
 Coinbase: https://blog.coinbase.com/fact0rn-blockchain-integer-factorization-as-proof-of-work-pow-bc48c6f2100b <br>
 E-mail: fact0rn@pm.me <br>
-Discord: https://discord.gg/gG7MXxS5Fd <br>
-Twitter: https://twitter.com/LionesEscanor <br>
+Discord: https://discord.gg/tE2BNpgmtH <br>
+Twitter: https://twitter.com/FACT0RN <br>
 Reddit: https://www.reddit.com/r/FACT0RN/
