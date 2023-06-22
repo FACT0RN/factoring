@@ -14,7 +14,7 @@ docker build -t factorn_mining .
 2. Now, to run a container do this:
 
 ```
-docker run -ti -e SCRIPTPUBKEY="ValidScriptPubKey" -e RPC_USER="Your node's rpc username" -e RPC_PASS="Your node rpc's password" -e YAFU_THREADS=max_core_count_minus_one -e YAFU_LATHREADS=max_core_count_minus_one --network host factorn_mining  bash -c "python3.10 FACTOR.py"
+docker run -ti -e SCRIPTPUBKEY="ValidScriptPubKey" -e RPC_USER="Your node's rpc username" -e RPC_PASS="Your node rpc's password" -e YAFU_THREADS=max_core_count_minus_one -e YAFU_LATHREADS=max_core_count_minus_one -e MSIEVE_BIN="/tmp/ggnfs-bin/" --network host factorn_mining  bash -c "python3.10 FACTOR.py"
 ```
 
 I'd recommend to run one container. Use as many threads as you have cores, minus one so the OS has on core to do normal system stuff. If you run htop you will see how many cores you have.
