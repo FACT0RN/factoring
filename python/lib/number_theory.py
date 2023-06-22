@@ -9,7 +9,7 @@ from time import time
 import sympy as sp
 import os
 
-MSIEVE_BIN = os.environ.get("MSIEVE_BIN", "NONE") 
+MSIEVE_BIN = os.environ.get("MSIEVE_BIN", "/tmp/ggnfs-bin/") 
 YAFU_BIN   = os.environ.get("YAFU_BIN",   "NONE")
 CADO_BIN   = os.environ.get("CADO_BIN",   "NONE")
 YAFU_THREADS   = os.environ.get("YAFU_THREADS",   "4")
@@ -87,7 +87,7 @@ def yafu_factor_driver(n):
   print("[*] Factoring %d with yafu..." % n)
   import subprocess, re, os
   tmp = []
-  proc = subprocess.Popen([YAFU_BIN,"-one","-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, str(n)],stdout=subprocess.PIPE)
+  proc = subprocess.Popen([YAFU_BIN,"-one","-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, "-ggnfs_dir", MSIEVE_BIN,  str(n)],stdout=subprocess.PIPE)
   for line in proc.stdout:
     line = line.rstrip().decode("utf8")
     if re.search("P\d+ = \d+",line):
