@@ -14,6 +14,7 @@ YAFU_BIN   = os.environ.get("YAFU_BIN",   "NONE")
 CADO_BIN   = os.environ.get("CADO_BIN",   "NONE")
 YAFU_THREADS   = os.environ.get("YAFU_THREADS",   "4")
 YAFU_LATHREADS = os.environ.get("YAFU_LATHREADS", "4")
+YAFU_TIMEOUT   = os.environ.get("YAFU_TIMEOUT", "500")
 
 #Factoring libraries
 USE_PARI = True if ( (YAFU_BIN == "NONE") or (YAFU_BIN == "NONE")) else False
@@ -87,14 +88,28 @@ def yafu_factor_driver(n):
   print("[*] Factoring %d with yafu..." % n)
   import subprocess, re, os
   tmp = []
-  proc = subprocess.run([YAFU_BIN,"-one","-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, "-ggnfs_dir", MSIEVE_BIN, "-xover", "110", "-snfs_xover", "105",  str(n)], timeout=60*4, stdout=subprocess.PIPE)
-  for line in proc.stdout:
-    line = line.rstrip().decode("utf8")
-    if re.search("P\d+ = \d+",line):
-      tmp += [int(line.split("=")[1])]
-    if re.search("C\d+ = \d+",line):
-      tmp += [int(line.split("=")[1])]
+  try:
+     parse = subprocess.run([YAFU_BIN,"-one","-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, "-ggnfs_dir", MSIEVE_BIN, "-xover", "110", "-snfs_xover", "108",  str(n)], timeout=int(YAFU_TIMEOUT), stdout=subprocess.PIPE)
+  except subprocess.TimeoutExpired:
+     print("Timeout: ", YAFU_TIMEOUT, " Seconds. Moving on to next candidate")
+     parse = [ "C" + str(n.bit_lentgh()) + " = " + str(n) ]
+
+  parse = [ line for line in parse.stdout.decode('utf-8').split("\n") if "=" in line ]
+  tmp = []
+  flag=False
+
+  for line in parse:
+      if "Total factoring" in line:
+          flag = True
+          continue
+      if "ans" in line:
+          continue
+
+      if flag:
+          tmp.append(line)
+
   return tmp
+
 
 def cfactor(n):
   print("[*] pari factoring: %d..." % n)

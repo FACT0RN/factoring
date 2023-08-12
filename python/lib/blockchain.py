@@ -318,6 +318,8 @@ class CBlock(ctypes.Structure):
                  #Note: the block requires the smaller of the two prime factors to be submitted.
                  #By default, cypari2 lists the factors in ascending order so choose the first factor listed.
                  factors = factorization_handler(n)
+                 factors = [ int(a.split("=")[1]) for a in factors ]
+
                  self.Count += 1
                  if (len(factors) == 2):
                     if ( factors[0].bit_length() ==  ( block.nBits//2 + (block.nBits&1))  ):
