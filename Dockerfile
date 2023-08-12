@@ -186,6 +186,7 @@ COPY --from=builder /tmp/yafu/yafu                         /tmp/yafu/yafu
 
 #Copy yafu ini file
 COPY docker/yafu.ini /tmp/yafu
+COPY docker/yafu.ini /tmp/factoring/python
 
 ENV OMP_PROC_BIND="TRUE"
 ENV MSIEVE_BIN="/tmp/ggnfs-bin"
