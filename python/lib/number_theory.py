@@ -89,7 +89,7 @@ def yafu_factor_driver(n):
   import subprocess, re, os
   tmp = []
   try:
-     parse = subprocess.run([YAFU_BIN,"-one","-plan", "custom","-pretest_ratio","0.32", "-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, "-ggnfs_dir", MSIEVE_BIN, "-xover", "98", "-snfs_xover", "90",  str(n)], timeout=int(YAFU_TIMEOUT), stdout=subprocess.PIPE)
+     parse = subprocess.run([YAFU_BIN,"-one","-plan", "custom","-pretest_ratio","0.30", "-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, "-ggnfs_dir", MSIEVE_BIN, "-xover", "120", "-snfs_xover", "125",  str(n)], timeout=int(YAFU_TIMEOUT), stdout=subprocess.PIPE)
   except subprocess.TimeoutExpired:
      print("Timeout: ", YAFU_TIMEOUT, " Seconds. Moving on to next candidate")
      return [ "C" + str( n.bit_length() ) + " = " + str(n) ]
