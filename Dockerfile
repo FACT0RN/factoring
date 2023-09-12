@@ -66,7 +66,7 @@ RUN  wget https://github.com/FACT0RN/GMP/releases/download/release_6.2.1/gmp-6.2
      touch configure                                                                                       && \
      ./configure --with-gmp=/usr/local/                                                                    && \
      make  -j $BUILDTHREADS                                                                                && \
-     make check                                                                                            && \
+     make ecm-params                                                                                       && \
      make -j $BUILDTHREADS                                                                                 && \
      make install                                                                                          && \
      cd /tmp                                                                                               && \
@@ -110,7 +110,7 @@ RUN  wget https://github.com/FACT0RN/GMP/releases/download/release_6.2.1/gmp-6.2
      git clone https://github.com/bbuhrow/yafu.git                                                         && \ 
      cd /tmp/yafu                                                                                          && \ 
      git checkout ecfeb34c87222e7becf4829e22f4899f7dd5bfc7                                                 && \
-     make yafu NFS=1
+     make yafu NFS=1 
 
 #Copy yafu ini file
 COPY docker/yafu.ini /tmp/yafu
