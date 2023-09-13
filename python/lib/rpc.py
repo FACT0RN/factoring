@@ -43,18 +43,40 @@ def rpc(method, params=None):
 ################################################################################
 # Bitcoin Daemon RPC Call Wrappers
 ################################################################################
-
-
 def rpc_getblocktemplate():
     try:
         return rpc("getblocktemplate", [{"rules": ["segwit"]}])
     except ValueError:
         return {}
 
-
 def rpc_submitblock(block_submission):
     return rpc("submitblock", [block_submission])
 
-
 def rpc_getblockcount():
     return rpc( "getblockcount" )
+
+def rpc_getblockhash(height):
+    return rpc( "getblockhash", [height] )
+
+def rpc_getblock( Hash ):
+    return rpc( "getblock", [Hash, 2] )
+
+def block_who( height ):
+    bhash = rpc_getblockhash(height)
+    block = rpc_getblock(bhash)
+    wallet = block['tx'][0]['vout'][0]['scriptPubKey']['address']
+    mtime = block['mediantime']
+
+    return mtime
+
+def get_blocktime( n ):
+    TOP = rpc_getblockcount()
+    BLOCK_TIME = [0] * n
+    k = 0
+
+
+    for height in range(TOP - n, TOP ):
+        BLOCK_TIME[ k ] = block_who(height)
+        k += 1
+
+    return BLOCK_TIME

@@ -11,7 +11,8 @@ import os
 import struct
 import random
 import ctypes
-
+import statistics
+import subprocess
 
 SIEVE_MAX_LEVEL = os.environ.get("SIEVE_MAX_LEVEL")
 if SIEVE_MAX_LEVEL == None:
@@ -262,9 +263,23 @@ class CBlock(ctypes.Structure):
         #Iterate through a small set of random nonces
         #Probability of finding a good semiprime is extremely high
         Seeds = [ random.randint(0,1<<64) for i in range(10000)] if mine_latest_block else list(range(10000))
+        BLOCK_TIME = get_blocktime( 50 )
+        T = [t - s for s, t in zip(BLOCK_TIME, BLOCK_TIME[1:])]
+        avg = sum(T)/len(T)
+        std = statistics.stdev(T)
+        timeout = avg + 0*std
+
+        print("Recent Block Solving Stats ( Last ", str(50), " Blocks )")
+        print("    Avg Solve Time:", avg , " Seconds. ", avg/60, " Mins." )
+        print("Standard Deviation:", std , " Seconds. ", std/60, " Mins." )
+        print("      Yafu Timeout:","avg + 0*std ~ ", timeout, "Seconds or ", timeout//60, "minutes", timeout%60, "Seconds."  )
+
+	
 
         for nonce in Seeds:
             start = time()
+            total_time = 0
+
             #Set the nonce
             block.nNonce = nonce
 
@@ -312,12 +327,13 @@ class CBlock(ctypes.Structure):
 
                     #Check if the current block race has been won already
                     if rpc_getblockcount() + 1 != block.blocktemplate["height"]:
+                        parse = subprocess.run( "pkill yafu", capture_output=True, shell=True )
                         print("[LOST] Total lost time:", time() - self.START, " Seconds." )
                         return None
 
                  #Note: the block requires the smaller of the two prime factors to be submitted.
                  #By default, cypari2 lists the factors in ascending order so choose the first factor listed.
-                 factors = factorization_handler(n)
+                 factors = factorization_handler(n, timeout )
                  factors = [ int(a.split("=")[1]) for a in factors ]
 
                  self.Count += 1

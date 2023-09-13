@@ -14,7 +14,6 @@ YAFU_BIN   = os.environ.get("YAFU_BIN",   "NONE")
 CADO_BIN   = os.environ.get("CADO_BIN",   "NONE")
 YAFU_THREADS   = os.environ.get("YAFU_THREADS",   "4")
 YAFU_LATHREADS = os.environ.get("YAFU_LATHREADS", "4")
-YAFU_TIMEOUT   = os.environ.get("YAFU_TIMEOUT", "500")
 
 #Factoring libraries
 USE_PARI = True if ( (YAFU_BIN == "NONE") or (YAFU_BIN == "NONE")) else False
@@ -83,15 +82,15 @@ def msieve_factor_driver(n):
   os.system("rm %d.dat" % n)
   return tmp
 
-def yafu_factor_driver(n):
+def yafu_factor_driver(n, timeout = 60*30):
   global YAFU_BIN
   print("[*] Factoring %d with yafu..." % n)
   import subprocess, re, os
   tmp = []
   try:
-     parse = subprocess.run([YAFU_BIN,"-one","-plan", "custom","-pretest_ratio","0.32", "-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, "-ggnfs_dir", MSIEVE_BIN, "-xover", "98", "-snfs_xover", "90",  str(n)], timeout=int(YAFU_TIMEOUT), stdout=subprocess.PIPE)
+     parse = subprocess.run([YAFU_BIN,"-one","-plan", "custom","-pretest_ratio","0.32", "-threads",YAFU_THREADS,"-lathreads",YAFU_LATHREADS, "-ggnfs_dir", MSIEVE_BIN, "-xover", "160", "-snfs_xover", "150",  str(n)], timeout=timeout, stdout=subprocess.PIPE)
   except subprocess.TimeoutExpired:
-     print("Timeout: ", YAFU_TIMEOUT, " Seconds. Moving on to next candidate")
+     print("Timeout: ", timeout, " Seconds. Moving on to next candidate")
      return [ "C" + str( n.bit_length() ) + " = " + str(n) ]
 
   parse = [ line for line in parse.stdout.decode('utf-8').split("\n") if "=" in line ]
@@ -117,20 +116,20 @@ def cfactor(n):
   factors  = [int(a) for a in f0[0]]
   return factors
 
-def external_factorization(n):
+def external_factorization(n,timeout=60*30):
   factors = []
 
   if USE_PARI:
       factors = cfactor(n)
   else:
-      factors = yafu_factor_driver(n)
+      factors = yafu_factor_driver(n,timeout)
 
   #YAFU already uses msieve
   #if len(factors) == 0:
   #  factors = msieve_factor_driver(n)
   return factors
 
-def factorization_handler(n):
+def factorization_handler(n,timeout=30*60):
   print("[*] Factoring:",n)
 
 
@@ -139,7 +138,7 @@ def factorization_handler(n):
   F = []
 
   if len(F) == 0:
-    factors = external_factorization(n)
+    factors = external_factorization(n,timeout)
     print("[+] factors: %s" % str(factors))
   else:
     print("fdb got: %d factors: %s" % (len(F),str(F)))
