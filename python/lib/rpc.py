@@ -8,7 +8,7 @@ import random
 import os
 
 RPC_PORT     = os.environ.get("RPC_PORT", "8332")
-RPC_URL      = os.environ.get("RPC_URL", "http://127.0.0.1:"+ str(RPC_PORT) )
+RPC_URL      = os.environ.get("RPC_URL", "http://127.0.0.1"  ) + ":" + str(RPC_PORT)
 RPC_USER     = os.environ.get("RPC_USER", "rpcuser")
 RPC_PASS     = os.environ.get("RPC_PASS", "rpcpass")
 
